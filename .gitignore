@@ -1,27 +1,52 @@
-# Compiled class file
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
+# Generated files & caches
+/bin/
+/gen/
+/out/
+/build/
+app/build/
+.gradle/
 .kotlin/
+.externalNativeBuild/
+.cxx/
+/captures/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.navigation/
+
+# Android SDK / Local & Private configuration
+local.properties
+key.properties
+secrets.properties
+
+# Signing Keys & Keystores
+*.jks
+*.keystore
+*.pepk
+*.p12
+*.pem
+
+# Firebase / Google Services Credentials (optional to ignore if private)
+google-services.json
+app/google-services.json
+
+# OS & Log Files
+.DS_Store
+Thumbs.db
+.directory
+*.log

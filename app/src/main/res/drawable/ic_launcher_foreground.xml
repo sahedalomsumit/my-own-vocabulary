@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="0"
+        android:translateY="0">
+        <!-- Open Book Base & Spine Shadow -->
+        <!-- Left Page Base -->
+        <path
+            android:fillColor="#FDFBF7"
+            android:pathData="M52,38 C42,37 34,40 30,42 C28.9,42.5 28,43.5 28,44.8 L28,68.5 C28,69.8 29.2,70.8 30.5,70.5 C35,69 43,67 52,69.5 Z" />
+        <!-- Right Page Base -->
+        <path
+            android:fillColor="#FDFBF7"
+            android:pathData="M56,38 C66,37 74,40 78,42 C79.1,42.5 80,43.5 80,44.8 L80,68.5 C80,69.8 78.8,70.8 77.5,70.5 C73,69 65,67 56,69.5 Z" />
+        <!-- Bookmark Ribbon Hanging From Spine -->
+        <path
+            android:fillColor="#FDFBF7"
+            android:pathData="M52.5,37 L55.5,37 L55.5,77 L54,75 L52.5,77 Z" />
+        <!-- Inner Turning Page Accents / "V" Lexicon Line Art -->
+        <path
+            android:fillColor="#E0ECE7"
+            android:pathData="M52,43 C44,42 37,44 34,45.5 L34,47.5 C37,46 44,44 52,45 Z" />
+        <path
+            android:fillColor="#E0ECE7"
+            android:pathData="M52,49 C44,48 37,50 34,51.5 L34,53.5 C37,52 44,50 52,51 Z" />
+        <path
+            android:fillColor="#E0ECE7"
+            android:pathData="M56,43 C64,42 71,44 74,45.5 L74,47.5 C71,46 64,44 56,45 Z" />
+        <path
+            android:fillColor="#E0ECE7"
+            android:pathData="M56,49 C64,48 71,50 74,51.5 L74,53.5 C71,52 64,50 56,51 Z" />
+    </group>
+</vector>
