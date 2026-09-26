@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sahed.my_own_vocabulary.R
-import com.sahed.my_own_vocabulary.ui.components.BuiltBySahedFooter
 import com.sahed.my_own_vocabulary.ui.designsystem.components.EmeraldAlertDialog
 import com.sahed.my_own_vocabulary.ui.designsystem.components.EmeraldGlassCard
 import com.sahed.my_own_vocabulary.ui.designsystem.components.bouncyClickable
@@ -78,6 +77,12 @@ fun LoginScreen(
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
 
     // Auto-navigate if already signed in or on sign-in event
+    LaunchedEffect(currentUser) {
+        if (currentUser != null || viewModel.isLoggedIn) {
+            onNavigateToHome()
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.loginSuccessEvent.collect {
             onNavigateToHome()
@@ -119,15 +124,15 @@ fun LoginScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background ambient emerald glow aura
+            // Background ambient emerald glow aura centered
             Box(
                 modifier = Modifier
-                    .size(360.dp)
-                    .align(Alignment.TopCenter)
+                    .size(400.dp)
+                    .align(Alignment.Center)
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                EmeraldPalette.SoftEmerald.copy(alpha = 0.18f),
+                                EmeraldPalette.SoftEmerald.copy(alpha = 0.16f),
                                 EmeraldPalette.SoftEmerald.copy(alpha = 0.04f),
                                 Color.Transparent
                             )
@@ -135,29 +140,27 @@ fun LoginScreen(
                     )
             )
 
-            Column(
+            // Centered login content
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // Top section: Brand Identity & Highlights
                 Column(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Spacer(modifier = Modifier.height(24.dp))
-
                     // App Emblem with glowing layered ring
                     Image(
                         painter = painterResource(id = R.drawable.app_logo_tactile),
                         contentDescription = "My Own Vocabulary Logo",
                         modifier = Modifier
-                            .size(96.dp)
+                            .size(100.dp)
                             .shadow(
                                 elevation = 16.dp,
                                 shape = RoundedCornerShape(24.dp),
@@ -186,60 +189,35 @@ fun LoginScreen(
 
                     // Subtitle / Tagline
                     Text(
-                        text = "Master your language journey, one word at a time",
+                        text = "Note vocabulary, learn with quizes, and track your progress over time without ads.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = EmeraldTheme.extended.subText,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(36.dp))
 
-                    // Feature highlights cards
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        FeatureHighlightRow(
-                            icon = Icons.Rounded.AutoAwesome,
-                            title = "Smart Spaced Repetition",
-                            description = "Strengthen vocabulary with tailored memory retention"
-                        )
-                        FeatureHighlightRow(
-                            icon = Icons.Rounded.RecordVoiceOver,
-                            title = "Instant Native Audio",
-                            description = "Flawless pronunciation tuned to your speech pace"
-                        )
-                        FeatureHighlightRow(
-                            icon = Icons.Rounded.CloudSync,
-                            title = "Cloud Sync & Backup",
-                            description = "Your personal dictionary safe across all devices"
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Bottom section: Sign-In Action Area
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Google Sign-In Button ("Continue with Google")
+                    // Google Sign-In Button ("Continue with Google") in theme colors
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp)
-                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(14.dp))
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(14.dp),
+                                ambientColor = EmeraldPalette.EmeraldGlow,
+                                spotColor = EmeraldPalette.SoftEmerald
+                            )
                             .clip(RoundedCornerShape(14.dp))
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
-                                        Color(0xFFFFFFFF),
-                                        Color(0xFFF7FAF8)
+                                        EmeraldPalette.SoftEmerald,
+                                        EmeraldPalette.EmeraldGlow
                                     )
                                 )
                             )
-                            .border(1.dp, Color(0x332E9C7E), RoundedCornerShape(14.dp))
+                            .border(1.dp, EmeraldPalette.EmeraldGlow.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
                             .bouncyClickable {
                                 if (!uiState.isLoading) {
                                     val activity = context.findActivity()
@@ -260,13 +238,13 @@ fun LoginScreen(
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
                                     strokeWidth = 2.5.dp,
-                                    color = EmeraldPalette.SoftEmerald
+                                    color = Color.White
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = "Connecting...",
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = Color(0xFF1F2937)
+                                    color = Color.White
                                 )
                             }
                         } else {
@@ -275,19 +253,27 @@ fun LoginScreen(
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_google_logo),
-                                    contentDescription = "Google Logo",
-                                    modifier = Modifier.size(22.dp)
-                                )
-                                Spacer(modifier = Modifier.width(14.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_google_logo),
+                                        contentDescription = "Google Logo",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = "Continue with Google",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp
                                     ),
-                                    color = Color(0xFF1F2937)
+                                    color = Color.White
                                 )
                             }
                         }
@@ -307,11 +293,6 @@ fun LoginScreen(
                             color = EmeraldPalette.EmeraldGlow
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Footer branding
-                    BuiltBySahedFooter()
                 }
             }
         }

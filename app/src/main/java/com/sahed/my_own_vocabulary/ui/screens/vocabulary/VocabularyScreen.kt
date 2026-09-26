@@ -125,7 +125,7 @@ fun VocabularyScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Master words effortlessly every day",
+                                text = "Save and master vocabulary in your own way",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = EmeraldTheme.extended.subText
                             )
@@ -174,7 +174,7 @@ fun VocabularyScreen(
                     onValueChange = { viewModel.setSearchQuery(it) },
                     placeholder = {
                         Text(
-                            text = "Search words, translations, notes...",
+                            text = "Search by words, translations...",
                             color = EmeraldTheme.extended.subText
                         )
                     },

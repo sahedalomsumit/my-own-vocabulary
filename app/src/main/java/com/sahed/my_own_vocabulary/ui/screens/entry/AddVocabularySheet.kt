@@ -92,6 +92,12 @@ fun AddVocabularySheet(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (selectedMain == null) {
+            viewModel.restoreLastUsedFolders()
+        }
+    }
+
     // Dialog: Create New Main Folder with Language Flag Picker & Search
     if (showNewMainDialog) {
         MainFolderLanguageDialog(

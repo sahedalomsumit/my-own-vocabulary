@@ -6,6 +6,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.sahed.my_own_vocabulary.data.preferences.AppPreferences
 import com.sahed.my_own_vocabulary.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,10 @@ data class LoginUiState(
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val authRepository = AuthRepository(application)
+    val preferences = AppPreferences(application)
+
+    val isLoggedIn: Boolean
+        get() = authRepository.isUserSignedIn || preferences.isLoggedIn
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -38,6 +43,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             val result = authRepository.signInWithGoogle(activity)
 
             if (result.isSuccess) {
+                preferences.isLoggedIn = true
                 _uiState.update { it.copy(isLoading = false, errorMessage = null) }
                 _loginSuccessEvent.emit(Unit)
             } else {
@@ -62,6 +68,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val result = authRepository.signInAsGuest()
+            preferences.isLoggedIn = true
             _uiState.update { it.copy(isLoading = false) }
             _loginSuccessEvent.emit(Unit)
         }

@@ -127,6 +127,11 @@ class VocabularyRepository(
         vocabDao.searchEntriesFlow(query)
 
     suspend fun getEntryById(id: String): VocabularyEntryEntity? = vocabDao.getById(id)
+    suspend fun getLatestEntry(): VocabularyEntryEntity? = vocabDao.getLatestEntry()
+    suspend fun getLatestEntryForMainFolder(mainFolderId: String): VocabularyEntryEntity? =
+        vocabDao.getLatestEntryForMainFolder(mainFolderId)
+    suspend fun getLatestEntryForSubFolder(subFolderId: String): VocabularyEntryEntity? =
+        vocabDao.getLatestEntryForSubFolder(subFolderId)
 
     suspend fun insertEntry(entry: VocabularyEntryEntity) {
         vocabDao.insert(entry)

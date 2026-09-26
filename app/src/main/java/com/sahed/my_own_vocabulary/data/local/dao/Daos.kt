@@ -144,6 +144,15 @@ interface VocabularyEntryDao {
     @Query("SELECT * FROM vocabulary_entries WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): VocabularyEntryEntity?
 
+    @Query("SELECT * FROM vocabulary_entries ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestEntry(): VocabularyEntryEntity?
+
+    @Query("SELECT * FROM vocabulary_entries WHERE mainFolderId = :mainFolderId ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestEntryForMainFolder(mainFolderId: String): VocabularyEntryEntity?
+
+    @Query("SELECT * FROM vocabulary_entries WHERE subFolderId = :subFolderId ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestEntryForSubFolder(subFolderId: String): VocabularyEntryEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: VocabularyEntryEntity)
 

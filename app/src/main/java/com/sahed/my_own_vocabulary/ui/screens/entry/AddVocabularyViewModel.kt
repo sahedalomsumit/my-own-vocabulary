@@ -81,11 +81,106 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
     val saveSuccessEvent: SharedFlow<Unit> = _saveSuccessEvent.asSharedFlow()
 
     init {
-        // Automatically select first folder when loaded if none selected
+        // Automatically restore last used folders when main folders are available
         viewModelScope.launch {
-            val folders = repository.allMainFolders.first()
-            if (folders.isNotEmpty() && _selectedMainFolder.value == null) {
-                _selectedMainFolder.value = folders.first()
+            repository.allMainFolders.collect { folders ->
+                if (folders.isNotEmpty() && _selectedMainFolder.value == null) {
+                    restoreLastUsedFolders()
+                }
+            }
+        }
+
+        // Cleanly handle deletions from Manage Folders: if a selected folder is deleted, reset it
+        viewModelScope.launch {
+            mainFolders.collect { list ->
+                val current = _selectedMainFolder.value
+                if (current != null && list.none { it.id == current.id }) {
+                    _selectedMainFolder.value = list.firstOrNull()
+                    _selectedSubFolder.value = null
+                    _selectedSubSubFolder.value = null
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            subFoldersForSelectedMain.collect { list ->
+                val current = _selectedSubFolder.value
+                if (current != null && list.none { it.id == current.id }) {
+                    _selectedSubFolder.value = null
+                    _selectedSubSubFolder.value = null
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            subSubFoldersForSelectedSub.collect { list ->
+                val current = _selectedSubSubFolder.value
+                if (current != null && list.none { it.id == current.id }) {
+                    _selectedSubSubFolder.value = null
+                }
+            }
+        }
+    }
+
+    fun restoreLastUsedFolders() {
+        viewModelScope.launch {
+            val allMains = repository.allMainFolders.first()
+            if (allMains.isEmpty()) return@launch
+
+            val latestEntry = repository.getLatestEntry()
+
+            // 1. Select Main Folder
+            val currentMain = _selectedMainFolder.value
+            val mainToSelect = if (currentMain != null && allMains.any { it.id == currentMain.id }) {
+                currentMain
+            } else {
+                val savedMainId = preferences.lastUsedMainFolderId.first()
+                allMains.find { it.id == savedMainId }
+                    ?: allMains.find { it.id == latestEntry?.mainFolderId }
+                    ?: allMains.first()
+            }
+            _selectedMainFolder.value = mainToSelect
+
+            // 2. Select Sub Folder
+            val subFolders = repository.getSubFoldersForMain(mainToSelect.id).first()
+            val currentSub = _selectedSubFolder.value
+            val subToSelect = if (currentSub != null && subFolders.any { it.id == currentSub.id }) {
+                currentSub
+            } else {
+                val savedSubForMain = preferences.getLastUsedSubFolderForMain(mainToSelect.id).first()
+                val savedSubId = preferences.lastUsedSubFolderId.first()
+                when {
+                    savedSubForMain == AppPreferences.NONE_MARKER -> null
+                    savedSubForMain != null -> subFolders.find { it.id == savedSubForMain }
+                    latestEntry?.mainFolderId == mainToSelect.id && latestEntry.subFolderId != null ->
+                        subFolders.find { it.id == latestEntry.subFolderId }
+                    savedSubId != null -> subFolders.find { it.id == savedSubId }
+                    else -> null
+                }
+            }
+            _selectedSubFolder.value = subToSelect
+
+            // 3. Select Sub-Sub Folder
+            if (subToSelect != null) {
+                val subSubFolders = repository.getSubSubFoldersForSub(subToSelect.id).first()
+                val currentSubSub = _selectedSubSubFolder.value
+                val subSubToSelect = if (currentSubSub != null && subSubFolders.any { it.id == currentSubSub.id }) {
+                    currentSubSub
+                } else {
+                    val savedSubSubForSub = preferences.getLastUsedSubSubFolderForSub(subToSelect.id).first()
+                    val savedSubSubId = preferences.lastUsedSubSubFolderId.first()
+                    when {
+                        savedSubSubForSub == AppPreferences.NONE_MARKER -> null
+                        savedSubSubForSub != null -> subSubFolders.find { it.id == savedSubSubForSub }
+                        latestEntry?.subFolderId == subToSelect.id && latestEntry.subSubFolderId != null ->
+                            subSubFolders.find { it.id == latestEntry.subSubFolderId }
+                        savedSubSubId != null -> subSubFolders.find { it.id == savedSubSubId }
+                        else -> null
+                    }
+                }
+                _selectedSubSubFolder.value = subSubToSelect
+            } else {
+                _selectedSubSubFolder.value = null
             }
         }
     }
@@ -116,22 +211,108 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
         articleOrGender.value = null
         exampleSentence.value = ""
         notes.value = ""
-        _selectedSubSubFolder.value = null
+        // Crucial: Keep the last used sub-sub folder intact for smooth consecutive entry!
+        // If _selectedSubSubFolder is currently null and a sub-folder is selected, restore last used sub-sub folder.
+        if (_selectedSubSubFolder.value == null && _selectedSubFolder.value != null) {
+            restoreLastUsedSubSubFolderForCurrentSub()
+        }
+    }
+
+    private fun restoreLastUsedSubSubFolderForCurrentSub() {
+        val currentSub = _selectedSubFolder.value ?: return
+        viewModelScope.launch {
+            val subSubFolders = repository.getSubSubFoldersForSub(currentSub.id).first()
+            val savedSubSubForSub = preferences.getLastUsedSubSubFolderForSub(currentSub.id).first()
+            val latestEntryForSub = repository.getLatestEntryForSubFolder(currentSub.id)
+
+            val subSubToSelect = when {
+                savedSubSubForSub == AppPreferences.NONE_MARKER -> null
+                savedSubSubForSub != null -> subSubFolders.find { it.id == savedSubSubForSub }
+                latestEntryForSub?.subSubFolderId != null -> subSubFolders.find { it.id == latestEntryForSub.subSubFolderId }
+                else -> null
+            }
+            if (subSubToSelect != null) {
+                _selectedSubSubFolder.value = subSubToSelect
+            }
+        }
     }
 
     fun selectMainFolder(folder: MainFolderEntity) {
         _selectedMainFolder.value = folder
-        _selectedSubFolder.value = null
-        _selectedSubSubFolder.value = null
+        viewModelScope.launch {
+            preferences.setLastUsedMainFolderId(folder.id)
+            val subFolders = repository.getSubFoldersForMain(folder.id).first()
+            val savedSubForMain = preferences.getLastUsedSubFolderForMain(folder.id).first()
+            val latestEntry = repository.getLatestEntryForMainFolder(folder.id)
+
+            val subToSelect = when {
+                savedSubForMain == AppPreferences.NONE_MARKER -> null
+                savedSubForMain != null -> subFolders.find { it.id == savedSubForMain }
+                latestEntry?.subFolderId != null -> subFolders.find { it.id == latestEntry.subFolderId }
+                else -> null
+            }
+            _selectedSubFolder.value = subToSelect
+            preferences.setLastUsedSubFolderId(subToSelect?.id)
+
+            if (subToSelect != null) {
+                val subSubFolders = repository.getSubSubFoldersForSub(subToSelect.id).first()
+                val savedSubSubForSub = preferences.getLastUsedSubSubFolderForSub(subToSelect.id).first()
+                val latestEntryForSub = repository.getLatestEntryForSubFolder(subToSelect.id)
+
+                val subSubToSelect = when {
+                    savedSubSubForSub == AppPreferences.NONE_MARKER -> null
+                    savedSubSubForSub != null -> subSubFolders.find { it.id == savedSubSubForSub }
+                    latestEntryForSub?.subSubFolderId != null -> subSubFolders.find { it.id == latestEntryForSub.subSubFolderId }
+                    else -> null
+                }
+                _selectedSubSubFolder.value = subSubToSelect
+                preferences.setLastUsedSubSubFolderId(subSubToSelect?.id)
+            } else {
+                _selectedSubSubFolder.value = null
+                preferences.setLastUsedSubSubFolderId(null)
+            }
+        }
     }
 
     fun selectSubFolder(subFolder: SubFolderEntity?) {
         _selectedSubFolder.value = subFolder
-        _selectedSubSubFolder.value = null
+        viewModelScope.launch {
+            val main = _selectedMainFolder.value
+            if (main != null) {
+                preferences.setLastUsedSubFolderForMain(main.id, subFolder?.id)
+            }
+            preferences.setLastUsedSubFolderId(subFolder?.id)
+
+            if (subFolder == null) {
+                _selectedSubSubFolder.value = null
+                preferences.setLastUsedSubSubFolderId(null)
+            } else {
+                // Automatically select last used sub-sub folder for this sub-folder!
+                val subSubFolders = repository.getSubSubFoldersForSub(subFolder.id).first()
+                val savedSubSubForSub = preferences.getLastUsedSubSubFolderForSub(subFolder.id).first()
+                val latestEntryForSub = repository.getLatestEntryForSubFolder(subFolder.id)
+
+                val subSubToSelect = when {
+                    savedSubSubForSub == AppPreferences.NONE_MARKER -> null
+                    savedSubSubForSub != null -> subSubFolders.find { it.id == savedSubSubForSub }
+                    latestEntryForSub?.subSubFolderId != null -> subSubFolders.find { it.id == latestEntryForSub.subSubFolderId }
+                    else -> null
+                }
+                _selectedSubSubFolder.value = subSubToSelect
+                preferences.setLastUsedSubSubFolderId(subSubToSelect?.id)
+            }
+        }
     }
 
     fun selectSubSubFolder(subSubFolder: SubSubFolderEntity?) {
         _selectedSubSubFolder.value = subSubFolder
+        viewModelScope.launch {
+            preferences.setLastUsedSubSubFolderId(subSubFolder?.id)
+            val sub = _selectedSubFolder.value
+            if (sub != null) {
+                preferences.setLastUsedSubSubFolderForSub(sub.id, subSubFolder?.id)
+            }
+        }
     }
 
     fun selectArticle(article: String?) {
@@ -176,6 +357,9 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
             )
             repository.insertMainFolder(newFolder)
             _selectedMainFolder.value = newFolder
+            _selectedSubFolder.value = null
+            _selectedSubSubFolder.value = null
+            preferences.setLastUsedFolders(newFolder.id, null, null)
         }
     }
 
@@ -190,7 +374,10 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
             )
             repository.insertSubFolder(newSub)
             _selectedSubFolder.value = newSub
+            preferences.setLastUsedSubFolderId(newSub.id)
+            preferences.setLastUsedSubFolderForMain(main.id, newSub.id)
             _selectedSubSubFolder.value = null
+            preferences.setLastUsedSubSubFolderId(null)
         }
     }
 
@@ -205,6 +392,8 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
             )
             repository.insertSubSubFolder(newSubSub)
             _selectedSubSubFolder.value = newSubSub
+            preferences.setLastUsedSubSubFolderId(newSubSub.id)
+            preferences.setLastUsedSubSubFolderForSub(sub.id, newSubSub.id)
         }
     }
 
@@ -268,6 +457,17 @@ class AddVocabularyViewModel(application: Application) : AndroidViewModel(applic
                     ttsManager.speak(entry.getPronunciationText(), main.sourceLanguage, rate, pitch)
                 }
             }
+
+            // Persist the last used folders so they remain selected across app launches & entries
+            preferences.setLastUsedFolders(
+                mainId = main.id,
+                subId = _selectedSubFolder.value?.id,
+                subSubId = _selectedSubSubFolder.value?.id
+            )
+            _selectedSubFolder.value?.id?.let { subId ->
+                preferences.setLastUsedSubSubFolderForSub(subId, _selectedSubSubFolder.value?.id)
+            }
+            preferences.setLastUsedSubFolderForMain(main.id, _selectedSubFolder.value?.id)
 
             startNewEntry()
             _saveSuccessEvent.emit(Unit)

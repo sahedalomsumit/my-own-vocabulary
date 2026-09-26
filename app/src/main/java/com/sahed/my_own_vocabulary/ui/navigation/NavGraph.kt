@@ -21,6 +21,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import com.sahed.my_own_vocabulary.data.preferences.AppPreferences
+import com.sahed.my_own_vocabulary.data.repository.AuthRepository
 import com.sahed.my_own_vocabulary.ui.components.VocabBottomBar
 import com.sahed.my_own_vocabulary.ui.screens.calendar.CalendarScreen
 import com.sahed.my_own_vocabulary.ui.screens.calendar.CalendarViewModel
@@ -52,8 +55,18 @@ fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val authRepository = remember { AuthRepository(context) }
+    val preferences = remember { AppPreferences(context) }
+    val isUserLoggedIn = remember {
+        authRepository.isUserSignedIn || preferences.isLoggedIn
+    }
+    val startDestination = remember {
+        if (isUserLoggedIn) AppRoutes.VOCABULARY else AppRoutes.LOGIN
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: AppRoutes.VOCABULARY
+    val currentRoute = navBackStackEntry?.destination?.route ?: startDestination
 
     var showAddVocabularySheet by remember { mutableStateOf(false) }
 
@@ -127,7 +140,7 @@ fun AppNavGraph(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppRoutes.LOGIN,
+            startDestination = startDestination,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = innerPadding.calculateBottomPadding())
@@ -142,6 +155,7 @@ fun AppNavGraph(
                 LoginScreen(
                     viewModel = loginViewModel,
                     onNavigateToHome = {
+                        preferences.isLoggedIn = true
                         navController.navigate(AppRoutes.VOCABULARY) {
                             popUpTo(AppRoutes.LOGIN) { inclusive = true }
                             launchSingleTop = true
@@ -187,7 +201,10 @@ fun AppNavGraph(
                 val calendarViewModel: CalendarViewModel = viewModel()
                 CalendarScreen(
                     viewModel = calendarViewModel,
-                    onOpenAddVocabulary = { showAddVocabularySheet = true }
+                    onOpenAddVocabulary = {
+                        addVocabViewModel.startNewEntry()
+                        showAddVocabularySheet = true
+                    }
                 )
             }
 
@@ -204,6 +221,7 @@ fun AppNavGraph(
                         navController.navigate(AppRoutes.MANAGE_FOLDERS)
                     },
                     onSignOut = {
+                        preferences.isLoggedIn = false
                         navController.navigate(AppRoutes.LOGIN) {
                             popUpTo(0) { inclusive = true }
                             launchSingleTop = true

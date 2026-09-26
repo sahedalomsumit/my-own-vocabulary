@@ -148,6 +148,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun signOut() {
+        preferences.isLoggedIn = false
         authRepository.signOut()
     }
 
