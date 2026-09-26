@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sahed.my_own_vocabulary.data.preferences.AppPreferences
 import com.sahed.my_own_vocabulary.data.preferences.ThemeMode
+import com.sahed.my_own_vocabulary.ui.designsystem.components.AppBackground
 import com.sahed.my_own_vocabulary.ui.designsystem.theme.EmeraldDesignTheme
 import com.sahed.my_own_vocabulary.ui.navigation.AppNavGraph
 
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
             val themeMode by preferences.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.DARK)
 
             EmeraldDesignTheme(themeMode = themeMode) {
-                Surface(modifier = Modifier.fillMaxSize()) {
+                AppBackground(modifier = Modifier.fillMaxSize()) {
                     AppNavGraph()
                 }
             }

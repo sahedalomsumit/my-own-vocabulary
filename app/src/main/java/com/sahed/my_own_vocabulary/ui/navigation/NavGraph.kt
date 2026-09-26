@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import com.sahed.my_own_vocabulary.ui.designsystem.components.AppBackground
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -88,9 +90,11 @@ fun AppNavGraph(
         AppRoutes.SETTINGS
     )
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        bottomBar = {
+    AppBackground(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            bottomBar = {
             if (showBottomBar) {
                 VocabBottomBar(
                     currentRoute = currentRoute,
@@ -254,4 +258,5 @@ fun AppNavGraph(
             }
         }
     }
+}
 }

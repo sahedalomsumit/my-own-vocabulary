@@ -121,7 +121,7 @@ fun LoginScreen(
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = Color.Transparent
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Background ambient emerald glow aura centered

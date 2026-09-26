@@ -70,7 +70,11 @@ private val DarkExtendedColors = ExtendedColors(
     accent = EmeraldPalette.AccentPurple,
     articleDer = EmeraldPalette.ArticleDer,
     articleDie = EmeraldPalette.ArticleDie,
-    articleDas = EmeraldPalette.ArticleDas
+    articleDas = EmeraldPalette.ArticleDas,
+    backgroundTop = EmeraldPalette.DarkBackgroundGradientTop,
+    backgroundCenter = EmeraldPalette.DarkBackgroundGradientCenter,
+    backgroundBottom = EmeraldPalette.DarkBackgroundGradientBottom,
+    isDark = true
 )
 
 private val LightExtendedColors = ExtendedColors(
@@ -86,7 +90,11 @@ private val LightExtendedColors = ExtendedColors(
     accent = EmeraldPalette.AccentPurple,
     articleDer = EmeraldPalette.ArticleDer,
     articleDie = EmeraldPalette.ArticleDie,
-    articleDas = EmeraldPalette.ArticleDas
+    articleDas = EmeraldPalette.ArticleDas,
+    backgroundTop = EmeraldPalette.LightBackgroundGradientTop,
+    backgroundCenter = EmeraldPalette.LightBackgroundGradientCenter,
+    backgroundBottom = EmeraldPalette.LightBackgroundGradientBottom,
+    isDark = false
 )
 
 object EmeraldTheme {

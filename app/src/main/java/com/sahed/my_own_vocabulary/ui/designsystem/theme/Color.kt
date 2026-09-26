@@ -33,21 +33,30 @@ object EmeraldPalette {
     val WarningAmber = Color(0xFFFF9800)
     val ErrorRed     = Color(0xFFF44336)
 
-    // Dark Surfaces
-    val DarkBackground = Color(0xFF0A0F0D)
-    val Surface1Dark   = Color(0xFF111A17)
-    val Surface2Dark   = Color(0xFF182420)
-    val Surface3Dark   = Color(0xFF1F2E29)
+    // Dark Surfaces with subtle greenery undertones
+    val DarkBackground = Color(0xFF0C1914) // Rich deep forest-emerald dark
+    val Surface1Dark   = Color(0xFF13241E) // Elegant dark slate-emerald surface
+    val Surface2Dark   = Color(0xFF192E27)
+    val Surface3Dark   = Color(0xFF203930)
     val DarkGlassFill  = Color(0x1AFFFFFF) // 10% white
     val DarkGlassBorder= Color(0x33FFFFFF) // 20% white
 
+    // Background Gradient Shades (Atmospheric Greenery Depth)
+    val DarkBackgroundGradientTop    = Color(0xFF0F261E) // Rich dark emerald-tinted top shade
+    val DarkBackgroundGradientCenter = Color(0xFF0C1914) // Deep forest center shade
+    val DarkBackgroundGradientBottom = Color(0xFF08120E) // Grounded night shade
+
     // Light Surfaces
-    val LightBackground = Color(0xFFF4F7F5)
+    val LightBackground = Color(0xFFF3F7F5)
     val Surface1Light   = Color(0xFFFFFFFF)
     val Surface2Light   = Color(0xFFEDF4F1)
     val Surface3Light   = Color(0xFFDCEDE8)
     val LightGlassFill  = Color(0xB3FFFFFF) // 70% white
     val LightGlassBorder= Color(0x66FFFFFF) // 40% white
+
+    val LightBackgroundGradientTop    = Color(0xFFE9F3EE) // Soft sage morning tint
+    val LightBackgroundGradientCenter = Color(0xFFF2F7F4) // Gentle mint mist
+    val LightBackgroundGradientBottom = Color(0xFFF8FAF9) // Clean light base
 }
 
 @Immutable
@@ -64,7 +73,11 @@ data class ExtendedColors(
     val accent: Color,
     val articleDer: Color = EmeraldPalette.ArticleDer,
     val articleDie: Color = EmeraldPalette.ArticleDie,
-    val articleDas: Color = EmeraldPalette.ArticleDas
+    val articleDas: Color = EmeraldPalette.ArticleDas,
+    val backgroundTop: Color = EmeraldPalette.DarkBackgroundGradientTop,
+    val backgroundCenter: Color = EmeraldPalette.DarkBackgroundGradientCenter,
+    val backgroundBottom: Color = EmeraldPalette.DarkBackgroundGradientBottom,
+    val isDark: Boolean = true
 )
 
 val LocalExtendedColors = staticCompositionLocalOf {
@@ -78,6 +91,10 @@ val LocalExtendedColors = staticCompositionLocalOf {
         success = EmeraldPalette.SuccessGreen,
         warning = EmeraldPalette.WarningAmber,
         error = EmeraldPalette.ErrorRed,
-        accent = EmeraldPalette.AccentPurple
+        accent = EmeraldPalette.AccentPurple,
+        backgroundTop = EmeraldPalette.DarkBackgroundGradientTop,
+        backgroundCenter = EmeraldPalette.DarkBackgroundGradientCenter,
+        backgroundBottom = EmeraldPalette.DarkBackgroundGradientBottom,
+        isDark = true
     )
 }

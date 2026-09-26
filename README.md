@@ -63,7 +63,7 @@ com.sahed.my_own_vocabulary
 │   ├── preferences        # AppPreferences with Jetpack DataStore
 │   └── repository         # VocabularyRepository, SyncRepository
 ├── ui
-│   ├── components         # VocabBottomBar (Cradle cutout + FAB), BuiltBySahedFooter
+│   ├── components         # VocabBottomBar (Cradle cutout + FAB)
 │   ├── designsystem
 │   │   ├── components     # EmeraldGlassCard, bouncyClickable, GentleEntrance, StatCards
 │   │   └── theme          # Color, Shape, Type (DM Sans), Theme (Dark/Light/System)

@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sahed.my_own_vocabulary.data.local.entity.VocabularyEntryEntity
-import com.sahed.my_own_vocabulary.ui.components.BuiltBySahedFooter
 import com.sahed.my_own_vocabulary.ui.designsystem.components.EmeraldAlertDialog
 import com.sahed.my_own_vocabulary.ui.designsystem.components.HeroStreakCard
 import com.sahed.my_own_vocabulary.ui.designsystem.components.bouncyClickable
@@ -99,7 +98,7 @@ fun VocabularyScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
