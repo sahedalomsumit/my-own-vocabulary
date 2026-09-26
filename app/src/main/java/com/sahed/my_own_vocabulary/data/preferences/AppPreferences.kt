@@ -61,6 +61,7 @@ class AppPreferences(private val context: Context) {
         private val LAST_USED_MAIN_FOLDER_ID_KEY = stringPreferencesKey("last_used_main_folder_id")
         private val LAST_USED_SUB_FOLDER_ID_KEY = stringPreferencesKey("last_used_sub_folder_id")
         private val LAST_USED_SUB_SUB_FOLDER_ID_KEY = stringPreferencesKey("last_used_sub_sub_folder_id")
+        private val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
         const val NONE_MARKER = "__NONE__"
     }
 
@@ -125,6 +126,16 @@ class AppPreferences(private val context: Context) {
 
     val lastSyncTimestamp: Flow<String?> = context.vocabDataStore.data.map { preferences ->
         preferences[LAST_SYNC_TIMESTAMP_KEY]
+    }
+
+    val notificationsEnabled: Flow<Boolean> = context.vocabDataStore.data.map { preferences ->
+        preferences[NOTIFICATIONS_ENABLED_KEY] ?: true
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.vocabDataStore.edit { preferences ->
+            preferences[NOTIFICATIONS_ENABLED_KEY] = enabled
+        }
     }
 
     suspend fun setThemeMode(mode: ThemeMode) {

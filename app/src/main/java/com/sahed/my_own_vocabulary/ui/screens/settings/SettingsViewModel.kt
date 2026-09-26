@@ -56,6 +56,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val autoPronounceInQuiz: StateFlow<Boolean> = preferences.autoPronounceInQuiz
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val notificationsEnabled: StateFlow<Boolean> = preferences.notificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val lastSyncTimestamp: StateFlow<String?> = preferences.lastSyncTimestamp
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -75,6 +78,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             preferences.setAutoPronounceOnSave(enabled)
             preferences.setAutoPronounceInQuiz(enabled)
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferences.setNotificationsEnabled(enabled)
         }
     }
 

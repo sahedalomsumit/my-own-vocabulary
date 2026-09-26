@@ -111,49 +111,20 @@ fun VocabularyScreen(
             // 1. Top Header Banner & Stats
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "My Own Vocabulary",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "Save and master vocabulary in your own way",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = EmeraldTheme.extended.subText
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(EmeraldPalette.SoftEmerald.copy(alpha = 0.15f))
-                                .border(1.dp, EmeraldPalette.EmeraldGlow.copy(alpha = 0.3f), CircleShape)
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Rounded.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = EmeraldPalette.EmeraldGlow,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "$totalWords words",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EmeraldPalette.EmeraldGlow
-                                )
-                            }
-                        }
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "My Own Vocabulary",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Save and master vocabulary in your own way",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = EmeraldTheme.extended.subText
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

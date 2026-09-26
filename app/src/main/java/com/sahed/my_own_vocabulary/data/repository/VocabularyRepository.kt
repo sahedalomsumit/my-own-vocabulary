@@ -182,29 +182,25 @@ class VocabularyRepository(
 
     /**
      * Calculates consecutive streak days by inspecting distinct dates words were added.
+     * Streak counts only if user adds vocabulary every day including today.
+     * If vocabulary was not added today, streak resets to 0.
+     * When words are added again, it counts from 1 (or continues previous consecutive streak if unbroken).
      */
     val streakDaysFlow: Flow<Int> = vocabDao.getAllDatesWithEntriesFlow().map { dateList ->
         if (dateList.isEmpty()) return@map 0
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val dateSet = dateList.toSet()
 
-        var streak = 0
         val calendar = Calendar.getInstance()
-
-        // Check if today has words
         val todayStr = dateFormat.format(calendar.time)
-        val startedToday = dateSet.contains(todayStr)
 
-        if (!startedToday) {
-            // Check if yesterday had words, otherwise streak is broken
-            calendar.add(Calendar.DAY_OF_YEAR, -1)
-            val yesterdayStr = dateFormat.format(calendar.time)
-            if (!dateSet.contains(yesterdayStr)) {
-                return@map 0
-            }
+        // If user has not added any vocabulary today, streak resets to 0
+        if (!dateSet.contains(todayStr)) {
+            return@map 0
         }
 
-        // Count backward
+        var streak = 0
+        // Count backward consecutively starting from today
         while (true) {
             val dateStr = dateFormat.format(calendar.time)
             if (dateSet.contains(dateStr)) {

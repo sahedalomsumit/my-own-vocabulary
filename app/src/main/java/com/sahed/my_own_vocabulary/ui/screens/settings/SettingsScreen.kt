@@ -1,5 +1,8 @@
 package com.sahed.my_own_vocabulary.ui.screens.settings
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,26 +24,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FolderOpen
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,18 +54,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.sahed.my_own_vocabulary.BuildConfig
 import com.sahed.my_own_vocabulary.data.preferences.ThemeMode
 import com.sahed.my_own_vocabulary.ui.components.BuiltBySahedFooter
 import com.sahed.my_own_vocabulary.ui.designsystem.components.EmeraldAlertDialog
 import com.sahed.my_own_vocabulary.ui.designsystem.components.EmeraldGlassCard
 import com.sahed.my_own_vocabulary.ui.designsystem.components.bouncyClickable
+import com.sahed.my_own_vocabulary.ui.designsystem.components.gentleEntrance
 import com.sahed.my_own_vocabulary.ui.designsystem.theme.EmeraldPalette
 import com.sahed.my_own_vocabulary.ui.designsystem.theme.EmeraldTheme
+import com.sahed.my_own_vocabulary.util.DateUtils
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,17 +82,17 @@ fun SettingsScreen(
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     val currentTheme by viewModel.themeMode.collectAsStateWithLifecycle()
-    val speechRate by viewModel.speechRate.collectAsStateWithLifecycle()
-    val speechPitch by viewModel.speechPitch.collectAsStateWithLifecycle()
-    val autoPronounceSave by viewModel.autoPronounceOnSave.collectAsStateWithLifecycle()
-    val autoPronounceQuiz by viewModel.autoPronounceInQuiz.collectAsStateWithLifecycle()
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val defaultSourceLang by viewModel.defaultSourceLang.collectAsStateWithLifecycle()
     val defaultTargetLang by viewModel.defaultTargetLang.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
+    val versionName = BuildConfig.VERSION_NAME
+
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
-    var showVoiceDialog by remember { mutableStateOf(false) }
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showOtherAppsDialog by remember { mutableStateOf(false) }
 
     // Dialog: Language Pair Popup
     if (showLanguageDialog) {
@@ -235,105 +243,7 @@ fun SettingsScreen(
         )
     }
 
-    // Dialog: Voice & Speech Popup
-    if (showVoiceDialog) {
-        var localRate by remember(speechRate) { mutableFloatStateOf(speechRate) }
-        var localPitch by remember(speechPitch) { mutableFloatStateOf(speechPitch) }
 
-        EmeraldAlertDialog(
-            onDismissRequest = { showVoiceDialog = false },
-            title = "Voice & Pronunciation",
-            content = {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Speech Rate
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Speech Rate",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "${String.format(Locale.US, "%.1f", localRate)}x",
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldPalette.EmeraldGlow
-                            )
-                        }
-                        Slider(
-                            value = localRate,
-                            onValueChange = {
-                                localRate = it
-                                viewModel.setSpeechRate(it)
-                            },
-                            valueRange = 0.5f..1.5f,
-                            steps = 9,
-                            colors = SliderDefaults.colors(
-                                thumbColor = EmeraldPalette.SoftEmerald,
-                                activeTrackColor = EmeraldPalette.EmeraldGlow
-                            )
-                        )
-                    }
-
-                    // Pitch
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Voice Pitch",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "${String.format(Locale.US, "%.1f", localPitch)}x",
-                                fontWeight = FontWeight.Bold,
-                                color = EmeraldPalette.EmeraldGlow
-                            )
-                        }
-                        Slider(
-                            value = localPitch,
-                            onValueChange = {
-                                localPitch = it
-                                viewModel.setSpeechPitch(it)
-                            },
-                            valueRange = 0.5f..1.5f,
-                            steps = 9,
-                            colors = SliderDefaults.colors(
-                                thumbColor = EmeraldPalette.SoftEmerald,
-                                activeTrackColor = EmeraldPalette.EmeraldGlow
-                            )
-                        )
-                    }
-
-                    // Test Audio Button
-                    Button(
-                        onClick = { viewModel.testPronunciation() },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPalette.DeepGreen),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp)
-                            .bouncyClickable { viewModel.testPronunciation() }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.VolumeUp,
-                            contentDescription = null,
-                            tint = EmeraldPalette.EmeraldGlow,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Voice Audio", color = Color.White, fontWeight = FontWeight.SemiBold)
-                    }
-                }
-            },
-            confirmButtonText = "Done",
-            onConfirm = { showVoiceDialog = false }
-        )
-    }
 
     // Dialog: Sign Out Confirmation Popup
     if (showSignOutDialog) {
@@ -353,6 +263,101 @@ fun SettingsScreen(
                 viewModel.signOut()
                 onSignOut()
             }
+        )
+    }
+
+    // Dialog: Other Android Apps Popup
+    if (showOtherAppsDialog) {
+        EmeraldAlertDialog(
+            onDismissRequest = { showOtherAppsDialog = false },
+            title = "Other Android Apps",
+            content = {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        text = "Explore other helpful Android applications built by Sahed Alom Sumit:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = EmeraldTheme.extended.subText,
+                        lineHeight = 18.sp
+                    )
+
+                    // Money Tracker App Card
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(EmeraldTheme.extended.surfaceTier2)
+                            .border(1.dp, EmeraldTheme.extended.glassBorder, RoundedCornerShape(14.dp))
+                            .bouncyClickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahedalomsumit.com"))
+                                context.startActivity(intent)
+                            }
+                            .padding(14.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(EmeraldPalette.SoftEmerald.copy(alpha = 0.2f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountBalanceWallet,
+                                    contentDescription = null,
+                                    tint = EmeraldPalette.EmeraldGlow,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Money Tracker",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Personal finance, expenses & budget manager",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                    color = EmeraldTheme.extended.subText
+                                )
+                            }
+                        }
+                    }
+
+                    // Developer Website Button
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahedalomsumit.com"))
+                            context.startActivity(intent)
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPalette.DeepGreen),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .bouncyClickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahedalomsumit.com"))
+                                context.startActivity(intent)
+                            }
+                    ) {
+                        Text(
+                            text = "Visit sahedalomsumit.com",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            },
+            confirmButtonText = "Close",
+            dismissButtonText = null,
+            onConfirm = { showOtherAppsDialog = false }
         )
     }
 
@@ -399,8 +404,7 @@ fun SettingsScreen(
                                 contentDescription = "Profile Photo",
                                 modifier = Modifier
                                     .size(56.dp)
-                                    .clip(CircleShape)
-                                    .border(2.dp, EmeraldPalette.EmeraldGlow, CircleShape),
+                                    .clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
                         } else {
@@ -408,8 +412,7 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(CircleShape)
-                                    .background(EmeraldPalette.SoftEmerald)
-                                    .border(2.dp, EmeraldPalette.EmeraldGlow, CircleShape),
+                                    .background(EmeraldPalette.SoftEmerald),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val initial = (currentUser?.displayName?.firstOrNull()
@@ -458,47 +461,55 @@ fun SettingsScreen(
                         modifier = Modifier.padding(start = 6.dp, bottom = 8.dp)
                     )
 
-                    EmeraldGlassCard(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        cornerRadius = 22.dp
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp)
+                        // 1. Language Pair
+                        EmeraldGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            cornerRadius = 16.dp
                         ) {
-                            // 1. Language Pair (Popup)
                             SettingsRowItem(
                                 icon = Icons.Rounded.Translate,
                                 title = "Language Pair",
                                 subtitle = "${defaultSourceLang.uppercase()} ➔ ${defaultTargetLang.uppercase()} (${getLangDisplayName(defaultSourceLang)})",
                                 onClick = { showLanguageDialog = true }
                             )
+                        }
 
-                            // 2. Theme (Popup)
-                            val themeSubtitle = when (currentTheme) {
-                                ThemeMode.DARK -> "Dark"
-                                ThemeMode.LIGHT -> "Light"
-                                ThemeMode.SYSTEM -> "System"
-                            }
+                        // 2. Theme
+                        val themeSubtitle = when (currentTheme) {
+                            ThemeMode.DARK -> "Dark"
+                            ThemeMode.LIGHT -> "Light"
+                            ThemeMode.SYSTEM -> "System"
+                        }
+                        EmeraldGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            cornerRadius = 16.dp
+                        ) {
                             SettingsRowItem(
                                 icon = Icons.Rounded.Palette,
                                 title = "Theme",
                                 subtitle = themeSubtitle,
                                 onClick = { showThemeDialog = true }
                             )
+                        }
 
-                            // 3. Auto-Pronounce (Switch)
-                            val isAutoPronounceActive = autoPronounceSave || autoPronounceQuiz
+                        // 3. Notifications
+                        EmeraldGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            cornerRadius = 16.dp
+                        ) {
                             SettingsRowItem(
-                                icon = Icons.AutoMirrored.Rounded.VolumeUp,
-                                title = "Notifications & Speech",
-                                subtitle = if (isAutoPronounceActive) "Auto-pronounce enabled" else "Audio on click only",
+                                icon = Icons.Rounded.Notifications,
+                                title = "Notifications",
+                                subtitle = if (notificationsEnabled) "Study reminders & review alerts" else "Notifications paused",
                                 trailingContent = {
                                     Switch(
-                                        checked = isAutoPronounceActive,
+                                        checked = notificationsEnabled,
                                         onCheckedChange = { checked ->
-                                            viewModel.setAutoPronounceAll(checked)
+                                            viewModel.setNotificationsEnabled(checked)
                                         },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
@@ -507,18 +518,16 @@ fun SettingsScreen(
                                             uncheckedTrackColor = EmeraldTheme.extended.surfaceTier2
                                         )
                                     )
-                                }
+                                },
+                                onClick = { viewModel.setNotificationsEnabled(!notificationsEnabled) }
                             )
+                        }
 
-                            // 4. Voice & Speech (Popup)
-                            SettingsRowItem(
-                                icon = Icons.Rounded.RecordVoiceOver,
-                                title = "Voice Settings",
-                                subtitle = "Speed ${String.format(Locale.US, "%.1f", speechRate)}x, Pitch ${String.format(Locale.US, "%.1f", speechPitch)}x",
-                                onClick = { showVoiceDialog = true }
-                            )
-
-                            // 5. Manage Folders
+                        // 4. Manage Sources
+                        EmeraldGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            cornerRadius = 16.dp
+                        ) {
                             SettingsRowItem(
                                 icon = Icons.Rounded.FolderOpen,
                                 title = "Manage Sources",
@@ -565,11 +574,98 @@ fun SettingsScreen(
                 }
             }
 
-            // Footer
+            // 4. Support Section (Optional App-support Donation)
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SectionHeader(title = "Support My Own Vocabulary App", modifier = Modifier.gentleEntrance(4))
+
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .gentleEntrance(4)
+                    ) {
+                        Column {
+                            // Other Android Apps row (opens modal popup)
+                            SettingsItem(
+                                icon = Icons.Default.Apps,
+                                title = "Other Android Apps",
+                                subtitle = "By Sahed Alom Sumit",
+                                onClick = { showOtherAppsDialog = true }
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                            Column(modifier = Modifier.padding(18.dp)) {
+                                Text(
+                                    text = "If you benefit from this ad-free app, you may support it for maintenance.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    lineHeight = 22.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://donate.stripe.com/7sY9AS57S4XL7F4aqP8AE03"))
+                                        context.startActivity(intent)
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF635BFF)),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AccountBalanceWallet,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Donate with Stripe", fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5. Footer
             item {
                 Spacer(modifier = Modifier.height(10.dp))
-                BuiltBySahedFooter()
-                Spacer(modifier = Modifier.height(70.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .gentleEntrance(5),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Version $versionName",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "© ${DateUtils.getCurrentYear()} Sahed Alom Sumit",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    BuiltBySahedFooter(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahedalomsumit.com"))
+                            context.startActivity(intent)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(70.dp))
+                }
             }
         }
     }
@@ -664,4 +760,37 @@ private fun getLangDisplayName(code: String): String {
         "ar" -> "Arabic"
         else -> code.uppercase()
     }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall.copy(
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        ),
+        color = EmeraldPalette.EmeraldGlow,
+        modifier = modifier.padding(start = 6.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun SettingsItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    SettingsRowItem(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        modifier = modifier,
+        onClick = onClick
+    )
 }

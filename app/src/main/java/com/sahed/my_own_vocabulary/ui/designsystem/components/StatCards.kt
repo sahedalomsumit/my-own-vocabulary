@@ -91,12 +91,12 @@ fun HeroStreakCard(
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = if (streakDays > 0) "$streakDays Day Streak!" else "Start Learning!",
+                            text = if (streakDays > 0) "$streakDays Day Streak!" else "0 Day Streak",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = Color.White
                         )
                         Text(
-                            text = "Daily Practice Habit",
+                            text = if (streakDays > 0) "Vocabulary added today" else "Add vocabulary today to count",
                             style = MaterialTheme.typography.bodySmall,
                             color = EmeraldTheme.extended.subText
                         )
